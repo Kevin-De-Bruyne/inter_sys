@@ -67,7 +67,7 @@ router.beforeEach((to, from, next) => {
   //     }
   //   }
   // })
-  // store.commit('setToken','oZXFh6jHRTbIB5QwMQPkaC9wWsG8')
+  store.commit('setToken','oZXFh6jHRTbIB5QwMQPkaC9wWsG8')
 })
 
 new Vue({
