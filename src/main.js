@@ -45,29 +45,47 @@ Vue.prototype.showLoading = (msg) => {
 router.beforeEach((to, from, next) => {
   document.documentElement.scrollTop = 0
   next()
-  // Vue.prototype.$get('/api/client/checklogin').then(res=>{
-  //   console.log(res.code)
-  //   if(res.code==0){
-  //     Vue.prototype.showtitle('请授权登录').then(res=>{
-  //       window.location.href='http://test17.xuanjibian.cn/api/client/auth'
-  //     })
-  //   }else{
-  //     if(to.path!='/bindPhone'){
-  //       if(res.data.bindingmobile==0){
-  //         store.commit('setToken',res.data.original.openid)
-  //         Vue.prototype.showtitle('请绑定手机号').then(res=>{
-  //           next('/bindPhone')
-  //         })
-  //       }else{
-  //         store.commit('setToken',res.data.original.openid)
-  //         next()
-  //       }
-  //     }else{
-  //       next()
-  //     }
-  //   }
-  // })
-  store.commit('setToken','oZXFh6jHRTbIB5QwMQPkaC9wWsG8')
+  Vue.prototype.$get('/api/client/checklogin').then(res=>{
+    console.log(res.code)
+    if(res.code==0){
+      Vue.prototype.showtitle('请授权登录').then(res=>{
+        window.location.href='http://test17.xuanjibian.cn/api/client/auth'
+      })
+    }else{
+      if(to.path!='/bindPhone'){
+        if(res.data.bindingmobile==0){
+          store.commit('setToken',res.data.original.openid)
+          Vue.prototype.showtitle('请绑定手机号').then(res=>{
+            next('/bindPhone')
+          })
+        }else{
+          store.commit('setToken',res.data.original.openid)
+          Vue.prototype.$get('/api/client/checkfollow',{
+            openid:store.state.token
+          }).then(res=>{
+            if(res.data.subscribe==0 && to.path!='/qrcode'){
+              Dialog.confirm({
+                title: '提醒',
+                message: '请先关注公众号',
+              })
+                .then(() => {
+                  // on confirm
+                  router.push('/qrcode')
+                })
+                .catch(() => {
+                  // on cancel
+                });
+            }else{
+              next()
+            }
+          })
+        }
+      }else{
+        next()
+      }
+    }
+  })
+  // store.commit('setToken','oZXFh6jHRTbIB5QwMQPkaC9wWsG8')
 })
 
 new Vue({

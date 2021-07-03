@@ -278,7 +278,7 @@ export default {
         }
         .info{
             display: flex;
-            min-width: 170px;
+            min-width: 190px;
             flex-direction: column;
             text-align-last: left;
             line-height: 20px;

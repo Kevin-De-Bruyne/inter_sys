@@ -9,14 +9,13 @@
             <div class="detail">办公室：{{detail.interview_office}}</div>
           </div>
           <div class="center">
-            <div class="detail">访客：{{detail.interview_realname}}</div>
-            <div class="detail">电话：{{detail.interview_mobile}}</div>
+            <div class="detail">访客：{{detail.realname}}</div>
+            <div class="detail">电话：{{detail.mobile}}</div>
             <div class="detail">部门：{{detail.department}}</div>
           </div>
           <div class="bottom">
             <div class="detail">申请时间：{{detail.created_at}}</div>
             <div class="detail">拜访时间：{{detail.apply_time}}</div>
-            <div class="detail">来访人：{{detail.realname}}</div>
             <div class="detail">来访人数：{{detail.together}}</div>
           </div>
           <div style="text-align:left;font-size:15px;margin-top:10px;">{{status_text}}</div>
@@ -31,12 +30,11 @@
             <div class="detail">楼层：18楼</div>
             <div class="detail">办公室：1809号</div>
           
-          <div class="detail">访客：{{detail.interview_realname}}</div>
-          <div class="detail">电话：{{detail.interview_mobile}}</div>
+          <div class="detail">访客：{{detail.realname}}</div>
+          <div class="detail">电话：{{detail.mobile}}</div>
           <div class="detail">部门：{{detail.department}}</div>
           <div class="detail">开始时间：{{detail.start_time}}</div>
           <div class="detail">结束时间：{{detail.end_time}}</div>
-          <div class="detail">来访人：{{detail.realname}}</div>
           <div class="detail">来访人数：{{detail.together}}</div>
           <!-- <div class="qrcode">
             <vue-qr  :text="JSON.stringify(qrcode)" :size="250"></vue-qr>
@@ -55,20 +53,35 @@
             <div class="detail">办公室：{{detail.interview_office}}</div>
           </div>
           <div class="center">
-            <div class="detail">访客：{{detail.interview_realname}}</div>
-            <div class="detail">电话：{{detail.interview_mobile}}</div>
+            <div class="detail">访客：{{detail.realname}}</div>
+            <div class="detail">电话：{{detail.mobile}}</div>
             <div class="detail">部门：{{detail.department}}</div>
           </div>
           <div class="bottom">
             <div class="detail">申请时间：{{detail.created_at}}</div>
             <div class="detail">拜访时间：{{detail.apply_time}}</div>
-            <div class="detail">来访人：{{detail.realname}}</div>
             <div class="detail">来访人数：{{detail.together}}</div>
           </div>
          <div class="review">
            <div class="refuse" @click="refuse">拒绝预约</div>
            <div class="agree" @click="show=true">同意预约</div>
          </div>
+        <van-dialog
+          v-model="showName"
+         title="拒绝理由"
+         show-cancel-button
+        :beforeClose="chargeBtn"
+        >
+    <!--输入框-->
+      <van-field
+      v-model="name"
+      rows="1"
+      autosize
+      label="理由"
+      type="textarea"
+      placeholder="请填写拒绝理由"
+      />
+     </van-dialog>
       </div>
         <van-popup v-model="show"  position="bottom">
          <van-datetime-picker
@@ -86,7 +99,7 @@
            v-model="currentDate"
           type="datetime"
           title="选择结束时间"
-          :min-date="minDate"
+          :min-date="minDate2"
           :max-date="maxDate"
           @confirm="confirm2"
         />
@@ -102,8 +115,8 @@
             <div class="detail">办公室：{{detail.interview_office}}</div>
           </div>
           <div class="center">
-            <div class="detail">访客：{{detail.interview_realname}}</div>
-            <div class="detail">电话：{{detail.interview_mobile}}</div>
+            <div class="detail">访客：{{detail.realname}}</div>
+            <div class="detail">电话：{{detail.mobile}}</div>
             <div class="detail">部门：{{detail.department}}</div>
           </div>
           <div class="bottom">
@@ -134,11 +147,15 @@ export default {
        show2:false,
        minDate: new Date(2020, 0, 1),
        maxDate: new Date(2025, 10, 1),
+       minDate2:new Date(2020, 0, 1),
        currentDate: new Date,
        formDate:'',
        formDate2:'',
        imageUrl: require("../assets/home_icon.png"),
-       qrcode:{}
+       qrcode:{},
+       showName:false,
+       name:'',
+       url:'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzkzMjI1NDU2NQ==#wechat_redirect'
      }
  },
  components:{
@@ -161,6 +178,31 @@ export default {
  },
  methods:{
    // 定时刷新数据函数
+    chargeBtn(action, done) {//确认or取消
+      if (action === 'cancel') {//取消按钮
+        done();
+      } else if (action === 'confirm') {//确定按钮
+          //向后端传值并关闭dialog弹出框
+            this.showName = false;
+           let header={
+            'apply-secret':this.sercet
+           }
+           let data={
+            guest_id:this.id,
+            status:2,
+            checkremark:this.name
+          }
+          this.$post('/api/client/check',data,header).then(res=>{
+             if(res.code==1){
+               this.showtitle('已拒绝！').then(res=>{
+                 this.$router.go(-1)
+               })
+             }
+          })
+          };
+        // this.message1='';
+        done();
+     },
    initData(){
       this.qrcode={
      codeID:this.$route.query.id,
@@ -184,33 +226,34 @@ export default {
       this.intervalId = null; //设置为null
     },
     refuse(){
-      Dialog.confirm({
-         title: '',
-         message: '你确定要拒绝申请吗',
-     })
-     .then(() => {
-      // on confirm
-       let header={
-         'apply-secret':this.sercet
-        }
-       let data={
-            guest_id:this.id,
-            status:2
-        }
-         this.$post('/api/client/check',data,header).then(res=>{
-             if(res.code==1){
-               this.showtitle('已拒绝！').then(res=>{
-                 this.$router.go(-1)
-               })
-             }
-          })
-     })
-     .catch(() => {
-     // on cancel
-      })
+      this.showName=true
+    //   Dialog.confirm({
+    //      title: '',
+    //      message: '拒绝理由',
+    //  })
+    //  .then(() => {
+    //   // on confirm
+    //    let header={
+    //      'apply-secret':this.sercet
+    //     }
+    //    let data={
+    //         guest_id:this.id,
+    //         status:2
+    //     }
+    //      this.$post('/api/client/check',data,header).then(res=>{
+    //          if(res.code==1){
+    //            this.showtitle('已拒绝！').then(res=>{
+    //              this.$router.go(-1)
+    //            })
+    //          }
+    //       })
+    //  })
+    //  .catch(() => {
+    //  // on cancel
+    //   })
     },
     confirm(e){
-          console.log(e)
+          this.minDate2=e
           let year=e.getFullYear()
           let month=e.getMonth()+1
           let day=e.getDate()
@@ -265,6 +308,8 @@ export default {
          this.status_text='被驳回'
        }else if(this.detail.status==3){
          this.status_text='已失效'
+       }else{
+         this.status_text='已结束'
        }
      })
    }

@@ -15,41 +15,92 @@
           </div>
           <div class="bottom">
             <div class="detail">邀请时间：{{detail.apply_time}}</div>
-            <div class="detail">来访人：{{detail.unit}}</div>
+            <div class="detail">来访人：{{detail.realname}}</div>
             <div class="detail">来访人数:{{detail.together}}</div>
           </div>
           <div style="text-align:left;font-size:15px;margin-top:10px;">{{status_text}}</div>
+          <div class="qrcode" v-if="$route.query.type==1 && detail.interview_status==1">
+               <vue-qr  :text="JSON.stringify(qrcode)" :size="200"></vue-qr>
+         </div>
       </div>
       </template>
   </div>
 </template>
 
 <script>
+  import vueQr from 'vue-qr'
 import Header from 'components/header'
 export default {
  data(){
      return{
        id:this.$route.query.id,
        detail:'',
-       status_text:''
+       status_text:'',
+        qrcode:{},
      }
  },
  components:{
-     Header
+     Header,
+     vueQr
  },
  created(){
    this.getDetail()
+    this.dataRefreh();
  },
+  mounted(){
+     this.initData();
+   },
+    destroyed(){
+    // 在页面销毁后，清除计时器
+    this.clear();
+   },
  methods:{
+    initData(){
+      this.qrcode={
+     codeID:this.$route.query.id,
+     codeTime:new Date().getTime()
+   }
+   },
+    dataRefreh() {
+      // 计时器正在进行中，退出函数
+      if (this.intervalId != null) {
+        return;
+      }
+      // 计时器为空，操作
+      this.intervalId = setInterval(() => {
+        console.log("刷新" + new Date());
+        this.initData(); //加载数据函数
+      }, 60000);
+    }, 
+    // 停止定时器
+    clear() {
+      clearInterval(this.intervalId); //清除计时器
+      this.intervalId = null; //设置为null
+    },
    getDetail(){
      this.$get('/api/client/checkdetail/'+this.id).then(res=>{
        this.detail=res.data
+       let role_id=localStorage.getItem('role_id')
+       if(role_id==0){
         if(this.detail.status==0){
          this.status_text='邀请中'
        }else if(this.detail.status==1){
          this.status_text='已邀请'
        }else if(this.detail.status==2){
          this.status_text='已失效'
+       }else{
+         this.status_text='已结束'
+       }
+       }else{
+        if(this.detail.interview_status==-1){
+           this.status_text='审批中'
+        }else if(this.detail.interview_status==1){
+         this.status_text='已接受'
+       }else if(this.detail.interview_status==2){
+         this.status_text='已失效'
+       }else{
+         this.status_text='已结束'
+       }
        }
      })
        

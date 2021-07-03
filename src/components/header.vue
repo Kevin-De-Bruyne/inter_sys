@@ -1,6 +1,7 @@
 <template>
    <div class="header">
        <span class="iconfont icon-fanhui" @click="back"></span>
+       <span class="iconfont iconfont icon-shouye" @click="home"></span>
        <span class="title">{{title}}</span>
    </div>
 </template>
@@ -22,6 +23,9 @@ export default {
         back(){
             this.$router.go(-1)
             this.$bus.$emit('alen',555)
+        },
+        home(){
+            this.$router.push('/')
         }
     }
 }

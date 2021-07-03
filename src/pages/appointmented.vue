@@ -1,7 +1,10 @@
 <template>
     <div class="yuyue">
-        <Header title="访客邀请"/>
-              <div class="apply_box">
+        <Header title="邀请转发"/>
+        <van-popup v-model="invite_pop" position="center" close-icon="close" closeable>
+            <img src="~assets/invite.png" alt="" class="invite_img">
+        </van-popup>
+         <div class="apply_box">
           <div class="apply_title">
               <span @click="$router.push('/appointmented')">时间地点</span>
           </div>
@@ -112,7 +115,7 @@
                     <div class="content_name">
                        <span>随行人数</span>
                     </div>
-                     <input type="text" placeholder="请输入人数，例如3" style="width:30%;" v-model="together"/>人
+                     <input type="text" placeholder="请输入人数，例如3" style="width:50%;" v-model="together"/>人
                 </div>
             </div>
         </div>
@@ -169,6 +172,7 @@
                realname:'',
                mobile:'',
                id_card:'',
+               invite_pop:false,
                unit:'',
                car_num:'',
                reason:'',
@@ -183,7 +187,10 @@
           Header
       },
       mounted(){
-        console.log(this.$route.query.id)
+        let guide_show=localStorage.getItem('gude_show')
+        if(guide_show==1){
+            this.invite_pop=true
+        }
         this.getInfo()
     
    
@@ -259,22 +266,50 @@
              'apply-secret':this.sercet,
           }
             let data={
-                id_card:this.id_card,
-                car_num:this.car_num,
-                health_code:this.health_code,
-                journey_code:this.journey_code,
+            realname:this.realname,
+              id_card:this.id_card,
+              together:this.together,
+              unit:this.unit,
+              mobile:this.mobile,
+              reason:this.reason,
+              apply_time:this.formDate,
+              car_num:this.car_num,
+              health_code:this.health_code,
+              journey_code:this.journey_code,
+              interview_realname:this.interview_realname,
+              interview_mobile:this.interview_mobile,
+              interview_unit:this.interview_unit,
+              interview_floor:this.interview_floor,
+              interview_office:this.interview_office,
+              type:this.$route.query.type,
+              department:this.department,
+                visit_staff_id:localStorage.getItem('id')
             }
-            if(this.id_card==''){
-                this.showtitle('请输入身份证号码')
-             }else if(this.health_code==''){
-              this.showtitle('请上传穗康码截图')
-            }else if(this.journey_code==''){
-              this.showtitle('请上传行程大数据截图')
+          if(this.interview_unit==''){
+              this.showtitle('请输入拜访单位')
+          }else if(this.formDate==''){
+              this.showtitle('请输入拜访时间')
+          }else if(this.interview_realname==''){
+              this.showtitle('请输入被访人姓名')
+          }else if(this.interview_mobile==''){
+              this.showtitle('请输入被访人电话')
+          }else if(!/^1[3456789]\d{9}$/.test(this.interview_mobile)){
+              this.showtitle('被访人电话格式不对')
+          }else if(this.realname==''){
+              this.showtitle('请输入访客姓名')
+          }else if(this.mobile==null){
+              this.showtitle('请输入访客电话')
+          }else if(!/^1[3456789]\d{9}$/.test(this.mobile)){
+              this.showtitle('访客电话格式不对')
+          }else if(this.id_card==''){
+              this.showtitle('请输入身份证号码')
+          }else if(this.reason==''){
+              this.showtitle('请输入拜访理由')
           } else{
               this.$post('/api/client/guest/update/'+id,data,header).then(res=>{
                   if(res.code==1){
                       this.showtitle(res.msg).then(res=>{
-                      this.$router.push('/visit')
+                      this.$router.push('/is_invite')
                   })
                   }else{
                       this.showtitle(res.msg)
@@ -288,9 +323,18 @@
   </script>
   
   <style lang="scss" scoped>
+ .invite_img{
+     max-width: 100%;
+     height: 80vh;
+ }
+  /deep/ .van-popup__close-icon--top-right{
+      top: 1px;
+      right: 30px;
+  }
   /deep/ .van-popup--center{
-      width: 80%;
-  
+      width: 100%;
+      background:none;
+      margin-top: -40px;
   }
   /deep/ .van-uploader__upload{
       width: 130px;
@@ -303,6 +347,7 @@
       .yuyue{
           width: 100%;
           // height: 100vh;
+          margin-top: 40px;
           padding-bottom:107px;
       }
       .apply_box:nth-child(3){
@@ -380,8 +425,6 @@
           }
       }
       .submit{
-          position: fixed;
-          bottom: 60px;
           display: flex;
           width: 100%;
           justify-content: center;
@@ -389,7 +432,7 @@
           .btn{
              background-color: rgb(5,129,253);
              border-radius: 5px;
-             padding: 5px 65px;
+             padding: 8px 90px;
           }
        }
   </style>

@@ -57,6 +57,15 @@ export default {
             //        })
             //   }
             this.data=res.data
+            if(res.data.staff_role_id!=null){
+                console.log(444)
+                localStorage.setItem('role_id',0)
+            }else{
+                 console.log(444)
+                localStorage.setItem('role_id',1)
+            }
+            
+            // localStorage.setItem('role_id',null)
             localStorage.setItem('id',res.data.id)
             this.userInfo={
                 name:res.data.name,

@@ -11,8 +11,14 @@
                   <div class="content_name">
                       <span>拜访单位</span>
                   </div>
-                  <input type="text" placeholder="请输入拜访单位" v-model="interview_unit"/>
+                  <input type="text" placeholder="请输入拜访单位" v-model.trim="interview_unit" @click="search"/>
               </div>
+               <div class="popList" v-if="popup">
+                <div v-for="(item,index) in dataList" :key="index" class="list" @click="listClick(index,item)">
+                      <span :style="{color:listIndex==index?'rgb(5,129,253)':''}">{{item.name}}</span>
+                      <span class="iconfont icon-arrow-right" style="color:rgb(5,129,253);" v-if="listIndex==index"></span>
+                </div>
+               </div>
               <div class="content_list">
                   <div class="content_name">
                       <span>楼层</span>
@@ -112,7 +118,7 @@
                   <div class="content_name">
                      <span>随行人数</span>
                   </div>
-                   <input type="text" placeholder="请输入人数，例如3" style="width:30%;" v-model="together"/>人
+                   <input type="text" placeholder="请输入人数，例如3" style="width:50%;" v-model="together"/>人
               </div>
           </div>
       </div>
@@ -150,6 +156,13 @@
 // import Header from 'components/header'
 import axios from 'axios'
 import Header from '../components/header.vue'
+const delay = (function () {
+  let timer = 0
+  return function (callback, ms) {
+    clearTimeout(timer)
+    timer = setTimeout(callback, ms)
+  }
+})()
 export default {
     data(){
         return{
@@ -168,24 +181,49 @@ export default {
              realname:'',
              mobile:'',
              id_card:'',
+             popup:false,
              unit:'',
+             listIndex:0,
              car_num:'',
              reason:'',
              together:'',
              health_code:'',
              journey_code:'',
              department:'',
-             title:this.$route.query.type==1?'预约申请':'访客邀请'
+             title:this.$route.query.type==1?'预约申请':'访客邀请',
+             dataList:[]
         }
+    },
+    watch : {
+		interview_unit () {
+             delay(() => {
+        this.search()
+      }, 500)
+    }
     },
     components:{
         Header
     },
     mounted(){
+        console.log(localStorage.getItem('id'))
        console.log(document.documentElement.scrollTop ) 
  
     },
     methods:{
+      listClick(index,item){
+          this.listIndex=index
+          this.interview_unit=item.name
+          this.popup=false
+      },
+      search(){
+          this.popup=true
+          this.$get('/api/client/getcompanylist',{
+              keyword:this.interview_unit
+          }).then(res=>{
+              this.listIndex=0
+              this.dataList=res.data
+          })
+      },
       afterRead(file,name) {
       // 此时可以自行将文件上传至服务器    
        let data = new FormData(); 
@@ -260,28 +298,22 @@ export default {
           if(this.$route.query.type==1){
           if(this.interview_unit==''){
               this.showtitle('请输入拜访单位')
-          }else if(this.interview_floor==''){
-              this.showtitle('请输入拜访楼层')
-          }else if(this.interview_office==''){
-              this.showtitle('请输入拜访办公室')
           }else if(this.formDate==''){
               this.showtitle('请输入拜访时间')
           }else if(this.interview_realname==''){
               this.showtitle('请输入被访人姓名')
           }else if(this.interview_mobile==''){
               this.showtitle('请输入被访人电话')
-          }else if(this.department==''){
-              this.showtitle('请输入部门')
-          }else if(this.realname==''){
+          }else if(!/^1[3456789]\d{9}$/.test(this.interview_mobile)){
+              this.showtitle('被访人电话格式不对')
+          } else if(this.realname==''){
               this.showtitle('请输入访客姓名')
           }else if(this.mobile==''){
               this.showtitle('请输入访客电话')
+          }else if(!/^1[3456789]\d{9}$/.test(this.mobile)){
+              this.showtitle('访客电话格式不对')
           }else if(this.id_card==''){
               this.showtitle('请输入身份证号码')
-          }else if(this.unit==''){
-              this.showtitle('请输入拜访人单位')
-          }else if(this.together==''){
-              this.showtitle('请输入随行人数')
           }else if(this.reason==''){
               this.showtitle('请输入拜访理由')
           }else{
@@ -300,34 +332,23 @@ export default {
          }else{
           if(this.interview_unit==''){
               this.showtitle('请输入拜访单位')
-          }else if(this.interview_floor==''){
-              this.showtitle('请输入拜访楼层')
-          }else if(this.interview_office==''){
-              this.showtitle('请输入拜访办公室')
           }else if(this.formDate==''){
               this.showtitle('请输入拜访时间')
           }else if(this.interview_realname==''){
               this.showtitle('请输入被访人姓名')
           }else if(this.interview_mobile==''){
-               this.showtitle('请输入被访人电话')
-          }else if(this.department==''){
-               this.showtitle('请输入部门')
+              this.showtitle('请输入被访人电话')
+          }else if(!/^1[3456789]\d{9}$/.test(this.interview_mobile)){
+              this.showtitle('被访人电话格式不对')
           }else if(this.realname==''){
               this.showtitle('请输入访客姓名')
-          }else if(this.mobile==''){
-              this.showtitle('请输入访客电话')
-          }else if(this.unit==''){
-              this.showtitle('请输入拜访人单位')
-          }else if(this.together==''){
-              this.showtitle('请输入随行人数')
-          }else if(this.reason==''){
-              this.showtitle('请输入拜访理由')
           }else{
                 this.$post('/api/client/guest',data,header).then(res=>{
                 if(res.code==1){
+                     localStorage.setItem('gude_show',1)
                    this.showtitle('填写成功，请转发给其他用户').then(
                        this.$router.push({path:'/appointmented',query:{id:res.data}})
-                   )
+                     )
                 }else{
                      this.showtitle(res.msg)
                 }
@@ -344,6 +365,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.popList{
+    // padding: 10px;
+    margin-top: 10px;
+    text-align: left;
+    padding-left: 20px;
+
+    padding-right: 20px;
+    .list{
+        line-height: 20px;
+            display: flex;
+        justify-content: space-between;
+   
+    }
+}
+/deep/ .van-popup--top{
+    top: 110px;
+}
 /deep/ .van-popup--center{
     width: 80%;
 
@@ -436,16 +474,17 @@ export default {
         }
     }
     .submit{
-        position: fixed;
-        bottom: 60px;
+        // position: fixed;
+        // bottom: 60px;
         display: flex;
         width: 100%;
         justify-content: center;
         color: white;  
+        margin-top: 30px;
         .btn{
            background-color: rgb(5,129,253);
            border-radius: 5px;
-           padding: 5px 65px;
+           padding: 8px 90px;
         }
      }
 </style>

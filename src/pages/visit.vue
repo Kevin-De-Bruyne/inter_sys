@@ -21,9 +21,9 @@
                      <div class="info">
                          <span class="name">{{item.realname}}</span>
                          <span class="company">拜访公司：{{item.unit}}</span>
-                         <span class="date" v-if="item.start_time!=null || item.end_time!=null">有效期:{{item.start_time+'-'+item.end_time}}</span>
+                         <span class="date" v-if="item.start_time!=null && item.end_time!=null">有效期:{{item.start_time+'-'+item.end_time}}</span>
                          <span class="date">拜访时间：{{item.apply_time}}</span>
-                         <span class="date">离开时间：{{item.leave_time}}</span>
+                         <span class="date" v-if="item.leave_time!=null">离开时间：{{item.leave_time}}</span>
                          <span class="date" style="color:rgb(5,129,253)">状态：{{invite_status(item.status)}}</span>
                      </div>
                      <div class="icon">
@@ -107,7 +107,7 @@ export default {
             this.getList()
         },
         listDetail(index,id){
-            this.$router.push({path:'/visit_detail',query:{index:index,id:id}})
+            this.$router.push({path:'/visit_detail',query:{id:id}})
             this.$store.commit('changeTab',index)
         },
          getList(){

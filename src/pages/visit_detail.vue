@@ -16,7 +16,7 @@
             <div class="bottom">
               <div class="detail" v-if="detail.start_time !=null && detail.end_time!=null">有效时间：{{detail.start_time+'-'+detail.end_time}}</div>
               <div class="detail">到访时间：{{detail.apply_time}}</div>
-              <div class="detail">离开时间:{{detail.leave_time}}</div>
+              <div class="detail"  v-if="detail.leave_time!=null">离开时间:{{detail.leave_time}}</div>
               <div class="detail">来访人：{{detail.realname}}</div>
               <div class="detail">来访人数:{{detail.together}}</div>
             </div>
@@ -40,9 +40,9 @@
               <div class="detail">公司：{{detail.interview_unit}}</div>
             </div>
             <div class="bottom">
-              <div class="detail">有效时间：{{detail.start_time+'-'+detail.end_time}}</div>
+              <div class="detail" v-if="detail.start_time !=null && detail.end_time!=null">有效时间：{{detail.start_time+'-'+detail.end_time}}</div>
               <div class="detail">到访时间：{{detail.apply_time}}</div>
-              <div class="detail">离开时间:{{detail.leave_time}}</div>
+              <div class="detail" v-if="detail.leave_time!=null">离开时间:{{detail.leave_time}}</div>
               <div class="detail">来访人：{{detail.realname}}</div>
               <div class="detail">来访人数:{{detail.together}}</div>
             </div>
@@ -61,7 +61,8 @@
          id:this.$route.query.id,
          detail:'',
          status_text:'',
-         qrcode:{}
+         qrcode:{},
+         url:'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzkzMjI1NDU2NQ==#wechat_redirect'
        }
    },
    components:{

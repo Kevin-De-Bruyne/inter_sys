@@ -34,6 +34,16 @@ const routes = [
     component:()=>import('pages/appointmented')
   },
   {
+    path:'/qrcode',
+    name: 'qrcode',
+    component:()=>import('pages/qrcode')
+  },
+  {
+    path:'/pass_code',
+    name: 'pass_code',
+    component:()=>import('pages/pass_code')
+  },
+  {
     path: '/visit',
     name: 'visit',
     component:()=>import('pages/visit')
@@ -60,6 +70,12 @@ const routes = [
     path: '/invite',
     name: 'invite',
     component:()=>import('pages/invite')
+ 
+  },
+  {
+    path: '/is_invite',
+    name: 'is_invite',
+    component:()=>import('pages/is_invite')
  
   },
   {
