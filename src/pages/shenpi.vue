@@ -1,63 +1,56 @@
 <template>
   <div class="record">
       <div class="topHead">
-          <Header title="审批记录" @click="head"/>
+          <Header title="审批记录" @click="head">
+              
+          </Header>
           <!-- <hello-world/> -->
-          <div class="top">
+          <div class="top" ref="list">
           <div class="top_search">
               <input  placeholder="请输入访客姓名" v-model="name"/>
               <span class="iconfont icon-sousuo" @click="search"></span>
           </div>  
          </div>
       </div>
-         <van-tabs v-model="active" @change="go">
-             <div v-for="(item,index) in tab" :key="index">
-                <van-tab :title="item.name">
-                <div class="content">
-                     <template v-if="list">
-                       <div class="content_list" v-for="(item,index) in list" :key="index" @click="listDetail(activeIndex,item.id,item.status)">
-                        <div class="pic" v-if="item.staff!=null">
-                            <img :src="item.staff.avatar" alt="">
-                        </div>
-                        <div class="pic" v-else>
-                            <span class="iconfont iconfont icon-geren"></span>
-                        </div>
-                         <div class="info">
-                         <span class="name">{{item.realname}}</span>
-                         <span class="company">拜访公司：{{item.unit}}</span>
-                         <span class="date" v-if="item.status==1 && item.start_time!=null && item.end_time!=null">有效期:{{item.start_time+'-'+item.end_time}}</span>
-                         <span class="date" v-if="activeIndex==1 || activeIndex==3 || activeIndex==0">申请时间：{{item.created_at}}</span>
-                         <span class="date" v-if="activeIndex==1 || activeIndex==3 || activeIndex==0">拜访时间：{{item.apply_time}}</span>
-                         <span class="date" style="color:rgb(5,129,253)">审核状态：{{statusClick(item.status)}}</span>
-                        </div>
-                        <div class="icon">
-                         <span class="iconfont icon-arrow-right"></span>
-                        </div>
-                       </div>
-                       <!-- <div style="margin-top:10px;" v-if="page<last_page">下拉加载更多...</div> -->
-                     </template>
-                     <template v-if="is_show">
-                         <div style="margin-top:50px;">暂无记录</div>
-                     </template>
-                </div>
-                </van-tab>
-             </div>
-          
-             <!-- <van-tab title="标签 2">内容 2</van-tab>
-             <van-tab title="标签 3">内容 3</van-tab>
-             <van-tab title="标签 4">内容 4</van-tab> -->
-         </van-tabs>
+      <!-- <div>{{statusClick}}</div> -->
+      <van-skeleton title avatar :row="11" :loading="loading" class="sk">
+        <div>实际内容</div>
+      </van-skeleton>
+     <list @active="activeClick">
+         <template slot-scope="scope" v-if="index==0 || index==1 || index==3">
+                <span class="date">申请时间：{{scope.created_at.created_at}}</span>
+                 <span class="date">拜访时间：{{scope.created_at.apply_time}}</span>
+         </template>
+         <!-- <template slot-scope="scopes" v-if="index==0 || index==1 || index==3">
+                <span class="date">拜访时间：{{scopes.apply_time}}</span>
+         </template> -->
+     </list>
   </div>
 </template>
 
 <script>
+var test = (function(a) {
+    console.log(a)
+    console.log(1111)
+    return function(b) {
+         console.log(222)
+        console.log(b)
+        return a + b;
+    }
+} (function(a, b) {
+    console.log(333)
+    return b;
+}(1, 2))); 
+console.log(test(4));
 import {Toast} from 'vant'
 import Header from 'components/header'
+import List from 'components/List'
 import HelloWorld from 'components/HelloWorld'
 export default {
     data(){
         return{
            active:0,
+           loading:true,
            activeIndex:0,
            tab:[
                {
@@ -84,32 +77,38 @@ export default {
           list:[],
           status:'',
           name:'',
+          index:'',
           last_page:'',
           is_show:false
         }
     },
     components:{
         Header,
-        HelloWorld
+        HelloWorld,
+        List
     },
     computed:{
-        statusClick(){
-            return(data)=>{
-                if(data==0){
-                    return '审核中'
-                }else if(data==1){
-                    return '已通过'
-                }else if(data==2){
-                    return '被驳回'
-                }else if(data==3){
-                    return '已失效'
-                }else{
-                    return '已结束'
-                }
-            }
+        statusClick({page}){
+            // return(data)=>{
+            //     if(data==0){
+            //         return '审核中'
+            //     }else if(data==1){
+            //         return '已通过'
+            //     }else if(data==2){
+            //         return '被驳回'
+            //     }else if(data==3){
+            //         return '已失效'
+            //     }else{
+            //         return '已结束'
+            //     }
+            // }
+            return page
         }
     },
     methods:{
+        activeClick(e){
+            this.index=e
+        },
         go(e){
             this.page=1
             this.list=[]
@@ -140,6 +139,7 @@ export default {
       }).then(res=>{
         //   console.log(res)
         if(res.code==1){
+            this.loading=false
              this.list=res.data.data
             if(this.list==''){
                 this.is_show=true
@@ -201,6 +201,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.sk{
+    margin-top: 150px;
+}
 .topHead{
     position: fixed;
     top:0;

@@ -159,7 +159,7 @@
           return{
               fileList:[],
               fileList2:[],
-               minDate: new Date(2020, 0, 1),
+               minDate: new Date,
                maxDate: new Date(2025, 10, 1),
                currentDate: new Date,
                show:false,
@@ -303,7 +303,7 @@
               this.showtitle('访客电话格式不对')
           }else if(this.id_card==''){
               this.showtitle('请输入身份证号码')
-          }else if(this.reason==''){
+          }else if(this.reason==null){
               this.showtitle('请输入拜访理由')
           } else{
               this.$post('/api/client/guest/update/'+id,data,header).then(res=>{

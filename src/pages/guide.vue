@@ -8,6 +8,7 @@
 
 <script>
 import Header from 'components/header'
+import informationVue from './information.vue'
 export default {
  data(){
      return{

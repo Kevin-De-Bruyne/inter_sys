@@ -168,7 +168,7 @@ export default {
         return{
             fileList:[],
             fileList2:[],
-             minDate: new Date(2020, 0, 1),
+             minDate: new Date,
              maxDate: new Date(2025, 10, 1),
              currentDate: new Date,
              show:false,

@@ -10,7 +10,11 @@
 export default {
     data(){
         return{
-
+              data: ['zhangsan','lisi','wanwu','zhaoliu','tianqi','xiaoba'],
+              user: {
+        firstName: "张",
+        lastName: "三"
+      }
         }
     },
     props:{

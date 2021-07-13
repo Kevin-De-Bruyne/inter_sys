@@ -1,6 +1,6 @@
 <template>
     <div class="sp_detail">
-        <template v-if="detail">
+        <template v-if=" detail && Object.keys(detail).length != 0">
          <Header title="详情"/>
           <div class="content">
             <div class="top">
@@ -42,7 +42,8 @@
          detail:{},
          status_text:'',
          qrcode:{},
-         url:'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzkzMjI1NDU2NQ==#wechat_redirect'
+         url:'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzkzMjI1NDU2NQ==#wechat_redirect',
+         show:false
        }
    },
    components:{
@@ -50,11 +51,11 @@
        vueQr
    },
    created(){
-     this.getDetail()
      this.dataRefreh();
    },
    mounted(){
-     this.initData();
+       this.initData();
+       console.log(this.qrcode)
    },
     destroyed(){
     // 在页面销毁后，清除计时器
@@ -64,10 +65,13 @@
     // 定时刷新数据函数
    initData(){
        this.getDetail().then(res=>{
-        this.qrcode={
+         if(res.code==1){
+           this.qrcode={
           codeID:res.data.id,
         codeTime:new Date().getTime()
         }
+         }
+        
        })
   
    },
@@ -94,6 +98,7 @@
            }).then(res=>{
                resolve(res)
            this.detail=res.data
+           console.log(this.detail)
          })
          })
          

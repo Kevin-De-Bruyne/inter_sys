@@ -63,12 +63,26 @@
          </div>
          </div>
      </div>
+     <!-- <input type="text" placeholder="请输入关键词" v-model="inputValue" @click="search"/>
+      <Search :inputValue="inputValue" :show="shows" :dataList="dataList" @clicks="clicks" :listIndex="listIndex"/> -->
    </div>
   <tab-bar></tab-bar>
   </div>
 </template>
 
 <script>
+const delay = (function (a) {
+  console.log(a)
+  let timer = 0
+  return function (callback, ms) {
+    clearTimeout(timer)
+    timer = setTimeout(callback, ms)
+  }
+} (function(a){
+  return a
+}(1)))
+import Search from 'components/search'
+import pdf from 'vue-pdf'
 import dropDown from "../components/droodown"
 // @ is an alias to /src
 export default {
@@ -76,8 +90,15 @@ export default {
   data(){
     return{
       id:3,
+      inputValue:'',
+      shows:false,
+      listIndex:0,
+      fileData:[],
+      dataList:[],
+      fileList:[],
+      pdfUrl:'',
       isActive:true,
-      role_show:localStorage.getItem('role_id'),
+      role_show:Number(localStorage.getItem('role_id')),
       activeColor:'purple',
       data:{},
       list:[
@@ -136,7 +157,9 @@ export default {
     }
   },
   components: {
-    dropDown
+    dropDown,
+    pdf,
+    Search
   },
   watch:{
     itemlist:{
@@ -145,9 +168,81 @@ export default {
       },
       deep: true,
       immediate:true
+    },
+    inputValue () {
+        delay(() => {
+        this.search()
+      }, 500)
     }
   },
   methods:{
+    clicks(name,index){
+      this.listIndex=index
+      this.shows=false
+      this.inputValue=name
+    },
+    search(){
+           this.shows=true
+          this.$get('/api/client/getcompanylist',{
+              keyword:this.inputValue
+          }).then(res=>{
+            this.listIndex=0
+              this.dataList=res.data
+          })
+    },
+    //上传文件之前的钩子
+   beforeUpload(file) {
+      console.log("文件", file);
+      this.file = file;
+      this.fileName = file.name;
+      this.fileSize = file.size;
+      let reader = new FileReader();
+      reader.readAsDataURL(file);
+      let that = this;
+      reader.onload = function() {
+        that.fileData = reader.result;
+        // console.log("fileData", reader.result);
+        console.log("fileData", that.fileData);
+      };
+      return false; // 返回false不会自动上传
+    },
+
+
+//预览文件
+   viewFile() {
+      console.log("viewFile");
+      var win = window.open();
+      win.document.write(
+        '<body style="margin:0px;"><object data="' +
+          this.fileData +
+          '" type="application/pdf" width="100%" height="100%"><iframe src="' +
+          this.fileData +
+          '" scrolling="no" width="100%" height="100%" frameborder="0" ></iframe></object></body>'
+      );
+      // win.document.write(
+      //   '<body style="margin:0px;"><iframe src="' +
+      //     this.fileData +
+      //     '" scrolling="no" width="100%" height="100%" frameborder="0" ></iframe></body>'
+      // );
+    },
+
+
+//上传文件
+    uploadContract() {
+      let fileFormData = new FormData();
+      fileFormData.append("file", this.file);
+      fileFormData.append("doc_title", this.fileName);
+      uploadContract(fileFormData).then(res => {
+        if (res.code == 200) {
+          console.log("uploadContract", res);
+        } else {
+          this.$message({
+            message: res.msg,
+            type: "warning"
+          });
+        }
+      });
+    },
      itemClick(data) {
       this.selectValue= data
     },
@@ -159,10 +254,12 @@ export default {
     swipeClick(){
        window.location.href='https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzkzMjI1NDU2NQ==#wechat_redirect'
     },
-    get(){
-      this.$get('/api/client/getconfig').then(res=>{
-          this.data=res.data
-      })
+    async get(){
+      // this.$get('/api/client/getconfig').then(res=>{
+      //     this.data=res.data
+      // })
+      let data=await this.$get('/api/client/getconfig')
+      this.data=data.data
     },
     post(){
       this.$post('/user',{
@@ -200,7 +297,7 @@ export default {
     // this.post()
   },
   mounted(){
-
+    console.log(localStorage.getItem('role_id'))
   }
 }
 </script>

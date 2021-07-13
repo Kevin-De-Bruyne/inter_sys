@@ -62,6 +62,12 @@ const routes = [
  
   },
   {
+    path: '/404',
+    name: '404',
+    component:()=>import('pages/404')
+ 
+  },
+  {
     path: '/shenpi_detail',
     name: 'shenpi_detail',
     component:()=>import('pages/shenpi_detail')

@@ -7,11 +7,14 @@ import Vant from 'vant';
 import 'vant/lib/index.css';
 import iView from 'view-design';
 import 'view-design/dist/styles/iview.css';
-import {Toast,Tabbar, TabbarItem,Swipe, SwipeItem,Tab, Tabs,Uploader,Dialog,Field,DatetimePicker,Popup} from 'vant'
+import {Toast,Tabbar, TabbarItem,Swipe, SwipeItem,Tab, Tabs,Uploader,Dialog,Field,DatetimePicker,Popup,Skeleton} from 'vant'
 import  TabBar from './components/TabBar'
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+Vue.use(ElementUI);
 Vue.use(Vant)
 Vue.use(iView)
-Vue.use(Toast,Tabbar, TabbarItem,Swipe, SwipeItem,Tab, Tabs,Uploader,Dialog,Field,DatetimePicker,Popup);
+Vue.use(Toast,Tabbar, TabbarItem,Swipe, SwipeItem,Tab, Tabs,Uploader,Dialog,Field,DatetimePicker,Popup,Skeleton);
 Vue.config.productionTip = false
 Vue.prototype.$get=get
 Vue.prototype.$post=post
@@ -44,7 +47,12 @@ Vue.prototype.showLoading = (msg) => {
 
 router.beforeEach((to, from, next) => {
   document.documentElement.scrollTop = 0
-  next()
+  if(to.matched.length==0){
+    next('/404')
+  }else{
+    next()
+  }
+
   Vue.prototype.$get('/api/client/checklogin').then(res=>{
     console.log(res.code)
     if(res.code==0){
